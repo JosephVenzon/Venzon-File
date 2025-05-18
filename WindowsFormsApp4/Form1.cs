@@ -308,8 +308,7 @@ namespace WindowsFormsApp4
         public static bool Value = true;
         public static void UpdateApplicationStatus(string status, string appId)
         {
-            // Only allow if the user is an admin
-            if (loggedInUser.Role != "Admin")  // Or use loggedInUser.IsAdmin if available
+            if (loggedInUser.Role != "Admin")
             {
                 MessageBox.Show("Only admins can update application status.");
                 Value = false;
