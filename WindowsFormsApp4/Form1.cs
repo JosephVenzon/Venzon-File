@@ -31,7 +31,7 @@ namespace WindowsFormsApp4
         }
 
 
-        static string connectionString = "Server=localhost;Database=jobdatabase;User ID=root;Password=;";
+        static string connectionString = "Server=localhost;Database=JobData;User ID=root;Password=;";
         static User loggedInUser = null;
 
         private void Login_Click(object sender, EventArgs e)
@@ -72,32 +72,49 @@ namespace WindowsFormsApp4
             }
         }
 
-        static void SetEmail(string Type, string name, string text, string emailadd)
+        static void SetEmail(string type, string name, string text, string emailAdd)
         {
-            MailAddress to = new MailAddress(emailadd);
-            MailAddress from = new MailAddress("davevenzon789@gmail.com");
-
-            MailMessage email = new MailMessage(from, to);
-            email.Subject = Type;
-            email.Body = text;
-
-            SmtpClient smtp = new SmtpClient
+            // Validate email address
+            if (string.IsNullOrWhiteSpace(emailAdd))
             {
-                Host = "smtp.gmail.com",
-                Port = 587,
-                Credentials = new NetworkCredential("davevenzon789@gmail.com", "jxmhfuvaeckvrtfu"),
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                EnableSsl = true
-            };
+                Console.WriteLine("Recipient email address is missing.");
+                return;
+            }
 
             try
             {
+                MailAddress to = new MailAddress(emailAdd);
+                MailAddress from = new MailAddress("davevenzon789@gmail.com");
+
+                MailMessage email = new MailMessage(from, to)
+                {
+                    Subject = type,
+                    Body = text
+                };
+
+                SmtpClient smtp = new SmtpClient
+                {
+                    Host = "smtp.gmail.com",
+                    Port = 587,
+                    Credentials = new NetworkCredential("davevenzon789@gmail.com", "jxmhfuvaeckvrtfu"),
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    EnableSsl = true
+                };
+
                 smtp.Send(email);
-                Console.WriteLine("Email sent successfully.");
+                Console.WriteLine("Email sent successfully to " + emailAdd);
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("The provided email address is not in a valid format: " + emailAdd);
             }
             catch (SmtpException ex)
             {
-                Console.WriteLine("Error sending email: " + ex.ToString());
+                Console.WriteLine("Error sending email: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Unexpected error: " + ex.Message);
             }
         }
 
@@ -118,9 +135,13 @@ namespace WindowsFormsApp4
                 return false;
             }
 
-            AddUserToDatabase(username, password, gmail);
+            string role = username.EndsWith("myadmin", StringComparison.OrdinalIgnoreCase) ? "Admin" : "User";
+
+            AddUserToDatabase(username, password, gmail, role);
             return true;
         }
+
+
 
 
 
@@ -137,27 +158,31 @@ namespace WindowsFormsApp4
             }
         }
 
-        static void AddUserToDatabase(string username, string password, string gmail)
+        static void AddUserToDatabase(string username, string password, string gmail, string role)
         {
             using (var connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "INSERT INTO Users (Id, Username, Password, Gmail) VALUES (@Id, @Username, @Password, @Gmail)";
+                string query = "INSERT INTO Users (Id, Username, Password, Gmail, Role) VALUES (@Id, @Username, @Password, @Gmail, @Role)";
                 MySqlCommand cmd = new MySqlCommand(query, connection);
+
                 cmd.Parameters.AddWithValue("@Id", Guid.NewGuid().ToString());
                 cmd.Parameters.AddWithValue("@Username", username);
                 cmd.Parameters.AddWithValue("@Password", password);
                 cmd.Parameters.AddWithValue("@Gmail", gmail);
+                cmd.Parameters.AddWithValue("@Role", role);
+
                 cmd.ExecuteNonQuery();
             }
         }
+
 
         static User GetUserFromDatabase(string username)
         {
             using (var connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "SELECT Id, Username, Password, Gmail FROM Users WHERE Username = @Username";
+                string query = "SELECT Id, Username, Password, Gmail, Role FROM Users WHERE Username = @Username";
                 MySqlCommand cmd = new MySqlCommand(query, connection);
                 cmd.Parameters.AddWithValue("@Username", username);
                 using (var reader = cmd.ExecuteReader())
@@ -168,7 +193,8 @@ namespace WindowsFormsApp4
                             reader["Id"].ToString(),
                             reader["Username"].ToString(),
                             reader["Password"].ToString(),
-                            reader["Gmail"].ToString()
+                            reader["Gmail"].ToString(),
+                            reader["Role"].ToString()
                         );
                     }
                     return null;
@@ -177,9 +203,10 @@ namespace WindowsFormsApp4
         }
 
 
+
         public static void AddJobApplicationToDatabase(string company, string jobTitle, string resumePath, string coverLetterPath)
         {
-            string connectionString = "Server=localhost;Database=jobdatabase;User ID=root;Password=;";
+            string connectionString = "Server=localhost;Database=JobData;User ID=root;Password=;";
 
             using (var connection = new MySqlConnection(connectionString))
             {
@@ -218,13 +245,51 @@ namespace WindowsFormsApp4
             return dt;
         }
 
+        public static DataTable ViewDataList()
+        {
+            DataTable dt = new DataTable();
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string query;
+
+                if (loggedInUser.Role == "Admin")
+                {
+                    query = "SELECT CompanyName, JobTitle, Status, Id, " +
+                            "IFNULL(DATE_FORMAT(InterviewDate, '%Y-%m-%d'), '') AS InterviewDate " +
+                            "FROM JobApplications";
+                }
+                else
+                {
+                    query = "SELECT CompanyName, JobTitle, Status, Id, " +
+                            "IFNULL(DATE_FORMAT(InterviewDate, '%Y-%m-%d'), '') AS InterviewDate " +
+                            "FROM JobApplications WHERE UserId = @UserId";
+                }
+
+                MySqlCommand cmd = new MySqlCommand(query, connection);
+
+                if (loggedInUser.Role != "Admin")
+                {
+                    cmd.Parameters.AddWithValue("@UserId", loggedInUser.Id);
+                }
+
+                using (var adapter = new MySqlDataAdapter(cmd))
+                {
+                    adapter.Fill(dt);
+                }
+            }
+            return dt;
+        }
+
+
         public static DataTable ViewUserInformation()
         {
             DataTable dt = new DataTable();
             using (var connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "SELECT Username, Id, Gmail, Password FROM Users WHERE Id = @UserId";
+                string query = "SELECT Username, Id, Role, Gmail, Password FROM Users WHERE Id = @UserId";
                 MySqlCommand cmd = new MySqlCommand(query, connection);
                 cmd.Parameters.AddWithValue("@UserId", loggedInUser.Id);
 
@@ -239,18 +304,33 @@ namespace WindowsFormsApp4
 
 
 
+
         public static bool Value = true;
         public static void UpdateApplicationStatus(string status, string appId)
         {
+            // Only allow if the user is an admin
+            if (loggedInUser.Role != "Admin")  // Or use loggedInUser.IsAdmin if available
+            {
+                MessageBox.Show("Only admins can update application status.");
+                Value = false;
+                return;
+            }
+
+            string[] allowedStatuses = { "Interviewed", "Hired", "Rejected" };
+            if (!allowedStatuses.Contains(status))
+            {
+                MessageBox.Show("Allowed values are: Interviewed, Hired, Rejected.");
+                Value = false;
+                return;
+            }
 
             using (var connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "UPDATE JobApplications SET Status = @Status WHERE Id = @AppId AND UserId = @UserId";
+                string query = "UPDATE JobApplications SET Status = @Status WHERE Id = @AppId";
                 MySqlCommand cmd = new MySqlCommand(query, connection);
                 cmd.Parameters.AddWithValue("@Status", status);
                 cmd.Parameters.AddWithValue("@AppId", appId);
-                cmd.Parameters.AddWithValue("@UserId", loggedInUser.Id);
 
                 int rowsAffected = cmd.ExecuteNonQuery();
 
@@ -258,23 +338,15 @@ namespace WindowsFormsApp4
                 {
                     MessageBox.Show("Invalid ID. Input correctly");
                     Value = false;
-                    return;
                 }
                 else
                 {
                     Value = true;
                     Console.WriteLine("Application status updated successfully.");
                 }
-
-                string[] allowedStatuses = { "Interviewed", "Hired", "Rejected" };
-                if (!allowedStatuses.Contains(status))
-                {
-                    MessageBox.Show("Allowed values are: Interviewed, Hired, Rejected.");
-                    Value = false;
-                    return;
-                }
             }
         }
+
 
         public static bool ScheduleInterview(string appId, string interviewDate)
         {
@@ -332,6 +404,11 @@ namespace WindowsFormsApp4
 
 
         }
+
+        private void Password_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 
 
@@ -342,23 +419,25 @@ namespace WindowsFormsApp4
         public string Username { get; set; }
         public string Password { get; set; }
         public string Gmail { get; set; }
-
+        public string Role { get; set; }
         public User(string username, string password, string gmail)
         {
             Id = Guid.NewGuid().ToString();
             Username = username;
             Password = password;
             Gmail = gmail;
+            Role = "User";
         }
-
-        public User(string id, string username, string password, string gmail)
+        public User(string id, string username, string password, string gmail, string role)
         {
             Id = id;
             Username = username;
             Password = password;
             Gmail = gmail;
+            Role = role;
         }
     }
+
 
 
     class JobApplication

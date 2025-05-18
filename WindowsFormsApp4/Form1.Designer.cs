@@ -115,6 +115,7 @@
             this.Password.SelectedText = "";
             this.Password.Size = new System.Drawing.Size(226, 36);
             this.Password.TabIndex = 4;
+            this.Password.TextChanged += new System.EventHandler(this.Password_TextChanged);
             // 
             // guna2HtmlLabel3
             // 

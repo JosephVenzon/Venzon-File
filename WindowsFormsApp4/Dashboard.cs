@@ -41,9 +41,6 @@ namespace WindowsFormsApp4
 
         }
 
-        static string connectionString = "Server=localhost;Database=jobdatabase;User ID=root;Password=;";
-        static User loggedInUser = null;
-
         private void btnAddApplication_Click(object sender, EventArgs e)
         {
             
@@ -260,7 +257,7 @@ namespace WindowsFormsApp4
 
         private void guna2GradientButton9_Click(object sender, EventArgs e)
         {
-            DataTable applications = Form1.ViewApplications();
+            DataTable applications = Form1.ViewDataList();
             UView.DataSource = applications;
         }
 
