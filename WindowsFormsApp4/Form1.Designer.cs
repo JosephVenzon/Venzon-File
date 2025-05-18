@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.guna2GradientPanel1 = new Guna.UI2.WinForms.Guna2GradientPanel();
             this.Login = new Guna.UI2.WinForms.Guna2GradientButton();
             this.Password = new Guna.UI2.WinForms.Guna2TextBox();
@@ -72,7 +73,7 @@
             // 
             this.Login.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.Login.BackColor = System.Drawing.Color.Transparent;
-            this.Login.BorderRadius = 5;
+            this.Login.BorderRadius = 15;
             this.Login.BorderThickness = 2;
             this.Login.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
             this.Login.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
@@ -104,9 +105,11 @@
             this.Password.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Password.ForeColor = System.Drawing.Color.Black;
             this.Password.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.Password.IconLeft = ((System.Drawing.Image)(resources.GetObject("Password.IconLeft")));
             this.Password.Location = new System.Drawing.Point(54, 187);
             this.Password.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Password.Name = "Password";
+            this.Password.PasswordChar = '*';
             this.Password.PlaceholderForeColor = System.Drawing.Color.Black;
             this.Password.PlaceholderText = "";
             this.Password.SelectedText = "";
@@ -140,6 +143,7 @@
             this.Username.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Username.ForeColor = System.Drawing.Color.Black;
             this.Username.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.Username.IconLeft = ((System.Drawing.Image)(resources.GetObject("Username.IconLeft")));
             this.Username.Location = new System.Drawing.Point(54, 111);
             this.Username.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Username.Name = "Username";

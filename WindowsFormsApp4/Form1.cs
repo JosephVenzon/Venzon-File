@@ -12,6 +12,7 @@ using System.Net.Mail;
 using System.Net;
 using System.Data.SqlClient;
 using Google.Protobuf.WellKnownTypes;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace WindowsFormsApp4
 {
@@ -109,14 +110,21 @@ namespace WindowsFormsApp4
         }
 
 
-        public static void RegisterUser(string username, string password, string gmail)
+        public static bool RegisterUser(string username, string password, string gmail)
         {
+            if (UserExists(username))
+            {
+                MessageBox.Show("Username already exists");
+                return false;
+            }
+
             AddUserToDatabase(username, password, gmail);
+            return true;
         }
 
 
 
-        static bool UserExists(string username)
+        public static bool UserExists(string username)
         {
             using (var connection = new MySqlConnection(connectionString))
             {
@@ -197,7 +205,7 @@ namespace WindowsFormsApp4
             {
                 connection.Open();
                 string query = "SELECT CompanyName, JobTitle, Status, Id, " +
-                               "IFNULL(DATE_FORMAT(InterviewDate, '%Y-%m-%d %H:%i:%s'), '') AS InterviewDate " +
+                               "IFNULL(DATE_FORMAT(InterviewDate, '%Y-%m-%d'), '') AS InterviewDate " +
                                "FROM JobApplications WHERE UserId = @UserId";
                 MySqlCommand cmd = new MySqlCommand(query, connection);
                 cmd.Parameters.AddWithValue("@UserId", loggedInUser.Id);
@@ -209,6 +217,25 @@ namespace WindowsFormsApp4
             }
             return dt;
         }
+
+        public static DataTable ViewUserInformation()
+        {
+            DataTable dt = new DataTable();
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "SELECT Username, Id, Gmail, Password FROM Users WHERE Id = @UserId";
+                MySqlCommand cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@UserId", loggedInUser.Id);
+
+                using (var adapter = new MySqlDataAdapter(cmd))
+                {
+                    adapter.Fill(dt);
+                }
+            }
+            return dt;
+        }
+
 
 
 
@@ -266,6 +293,23 @@ namespace WindowsFormsApp4
             }
         }
 
+        public static bool DeleteJobApplication(string appId)
+        {
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "DELETE FROM JobApplications WHERE Id = @AppId AND UserId = @UserId";
+                MySqlCommand cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@AppId", appId);
+                cmd.Parameters.AddWithValue("@UserId", loggedInUser.Id);
+
+                int rowsAffected = cmd.ExecuteNonQuery();
+
+                return rowsAffected > 0;
+            }
+        }
+
+
 
         public static bool SetFollowUpReminder(string appId, string interviewDate)
         {
@@ -301,7 +345,7 @@ namespace WindowsFormsApp4
 
         public User(string username, string password, string gmail)
         {
-            Id = Guid.NewGuid().ToString();  // Random ID generation for the user
+            Id = Guid.NewGuid().ToString();
             Username = username;
             Password = password;
             Gmail = gmail;

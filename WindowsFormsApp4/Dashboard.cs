@@ -18,6 +18,7 @@ namespace WindowsFormsApp4
         public Dashboard()
         {
             InitializeComponent();
+            Info.CellClick += Info_CellClick;
         }
 
         private void guna2GradientButton1_Click(object sender, EventArgs e)
@@ -76,8 +77,8 @@ namespace WindowsFormsApp4
         }
         private void guna2GradientButton1_Click_2(object sender, EventArgs e)
         {
-            DataTable applications = Form1.ViewApplications(); // Call the static method to get the data
-            dataGridView1.DataSource = applications; // Bind the data to the DataGridView
+            DataTable applications = Form1.ViewApplications();
+            dataGridView1.DataSource = applications;
         }
 
         private void guna2HtmlLabel1_Click(object sender, EventArgs e)
@@ -116,7 +117,7 @@ namespace WindowsFormsApp4
             }
 
             string appId = SID.Text;
-            string interviewDate = DatePicer.Value.ToString("yyyy-MM-dd HH:mm:ss");
+            string interviewDate = DatePicer.Value.ToString("yyyy-MM-dd");
 
             bool success = Form1.ScheduleInterview(appId, interviewDate);
 
@@ -139,7 +140,7 @@ namespace WindowsFormsApp4
             }
 
             string appId = TID.Text;
-            string interviewDate = STime.Value.ToString("yyyy-MM-dd HH:mm:ss");
+            string interviewDate = STime.Value.ToString("yyyy-MM-dd");
 
             bool success = Form1.SetFollowUpReminder(appId, interviewDate);
 
@@ -153,7 +154,39 @@ namespace WindowsFormsApp4
             }
         }
 
-        private void guna2GradientButton5_Click(object sender, EventArgs e)
+        
+
+        private void guna2HtmlLabel7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Job_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void guna2HtmlLabel8_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Resume_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void DatePicer_ValueChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void STime_ValueChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void guna2GradientButton6_Click(object sender, EventArgs e)
         {
             this.Hide();
             Form1 form1 = new Form1();
@@ -161,5 +194,123 @@ namespace WindowsFormsApp4
             MessageBox.Show("Successfully Log out!");
             form1.Show();
         }
+
+        private void guna2GradientButton7_Click(object sender, EventArgs e)
+        {
+            DataTable applications = Form1.ViewApplications();
+            DeleteBoard.DataSource = applications;
+        }
+
+        private void Delete_Click(object sender, EventArgs e)
+        {
+            string appIdToDelete = Deletebox.Text.Trim();
+
+            if (string.IsNullOrEmpty(appIdToDelete))
+            {
+                MessageBox.Show("Please enter a valid Application ID.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(Deletebox.Text))
+            {
+                MessageBox.Show("Complete the form first.");
+                return;
+            }
+
+            bool deleted = Form1.DeleteJobApplication(appIdToDelete);
+
+            if (deleted)
+            {
+                MessageBox.Show("Job application deleted successfully.");
+            }
+            else
+            {
+                MessageBox.Show("Invalid ID. Deletion failed.");
+            }
+
+        }
+
+        private void tabPage6_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void guna2GradientButton5_Click(object sender, EventArgs e)
+        {
+            DataTable applications = Form1.ViewApplications();
+            SView.DataSource = applications;
+        }
+
+        private void guna2GradientButton8_Click(object sender, EventArgs e)
+        {
+            FView.AllowUserToAddRows = false;
+            DataTable applications = Form1.ViewApplications();
+            FView.DataSource = applications;
+        }
+
+        private void guna2HtmlLabel15_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void STATUS_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void guna2GradientButton9_Click(object sender, EventArgs e)
+        {
+            DataTable applications = Form1.ViewApplications();
+            UView.DataSource = applications;
+        }
+
+        private void guna2GradientButton10_Click(object sender, EventArgs e)
+        {
+            Info.AllowUserToAddRows = false;
+
+            DataTable userInfo = Form1.ViewUserInformation();
+            Info.DataSource = userInfo;
+
+            
+            if (!Info.Columns.Contains("TogglePassword"))
+            {
+                var toggleColumn = new DataGridViewButtonColumn
+                {
+                    Name = "TogglePassword",
+                    HeaderText = "Password",
+                    UseColumnTextForButtonValue = false
+                };
+                Info.Columns.Add(toggleColumn);
+            }
+
+            foreach (DataGridViewRow row in Info.Rows)
+            {
+                if (row.Cells["Password"].Value != null)
+                {
+                    string realPassword = row.Cells["Password"].Value.ToString();
+                    row.Cells["Password"].Tag = realPassword;
+                    row.Cells["Password"].Value = new string('*', realPassword.Length);
+                    row.Cells["TogglePassword"].Value = "Show";
+                }
+            }
+        }
+
+
+        private void Info_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && Info.Columns[e.ColumnIndex].Name == "TogglePassword")
+            {
+                DataGridViewRow row = Info.Rows[e.RowIndex];
+                DataGridViewCell passwordCell = row.Cells["Password"];
+                string actualPassword = passwordCell.Tag?.ToString();
+                if (actualPassword == null) return;
+
+                bool isMasked = passwordCell.Value.ToString().StartsWith("*");
+                passwordCell.Value = isMasked ? actualPassword : new string('*', actualPassword.Length);
+                row.Cells["TogglePassword"].Value = isMasked ? "Hide" : "Show";
+            }
+        }
     }
+
+
 }

@@ -35,29 +35,28 @@ namespace WindowsFormsApp4
             string password = pass.Text;
             string email = gmail.Text.Trim();
 
-            // Validate input fields
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email))
             {
                 MessageBox.Show("Complete the form first.");
                 return;
             }
 
-            // Require @gmail.com email
             if (!email.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show("Email must be a valid @gmail.com address.");
                 return;
             }
 
-            // Proceed to register
-            Form1.RegisterUser(username, password, email);
+            bool success = Form1.RegisterUser(username, password, email);
 
-            MessageBox.Show("Registration successful!");
-
-            this.Hide();
-            Form1 loginForm = new Form1();
-            loginForm.Show();
-        }
+            if (success)
+            {
+                MessageBox.Show("Registration successful!");
+                this.Hide();
+                Form1 loginForm = new Form1();
+                loginForm.Show();
+            }
+}
 
         private void guna2GradientPanel2_Paint(object sender, PaintEventArgs e)
         {

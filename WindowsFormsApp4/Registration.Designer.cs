@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Registration));
             this.guna2GradientPanel1 = new Guna.UI2.WinForms.Guna2GradientPanel();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.gmail = new Guna.UI2.WinForms.Guna2TextBox();
@@ -96,6 +97,7 @@
             this.gmail.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.gmail.ForeColor = System.Drawing.Color.Black;
             this.gmail.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.gmail.IconLeft = ((System.Drawing.Image)(resources.GetObject("gmail.IconLeft")));
             this.gmail.Location = new System.Drawing.Point(47, 202);
             this.gmail.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.gmail.Name = "gmail";
@@ -109,7 +111,7 @@
             // 
             this.Register.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.Register.BackColor = System.Drawing.Color.Transparent;
-            this.Register.BorderRadius = 5;
+            this.Register.BorderRadius = 15;
             this.Register.BorderThickness = 2;
             this.Register.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
             this.Register.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
@@ -141,9 +143,11 @@
             this.pass.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.pass.ForeColor = System.Drawing.Color.Black;
             this.pass.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.pass.IconLeft = ((System.Drawing.Image)(resources.GetObject("pass.IconLeft")));
             this.pass.Location = new System.Drawing.Point(47, 157);
             this.pass.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pass.Name = "pass";
+            this.pass.PasswordChar = '*';
             this.pass.PlaceholderForeColor = System.Drawing.Color.Black;
             this.pass.PlaceholderText = "";
             this.pass.SelectedText = "";
@@ -177,6 +181,7 @@
             this.user.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.user.ForeColor = System.Drawing.Color.Black;
             this.user.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.user.IconLeft = ((System.Drawing.Image)(resources.GetObject("user.IconLeft")));
             this.user.Location = new System.Drawing.Point(47, 111);
             this.user.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.user.Name = "user";
